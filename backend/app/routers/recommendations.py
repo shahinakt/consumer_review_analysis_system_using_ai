@@ -11,8 +11,9 @@ from app.services.recommendation_service import (
     suggest_recommendations,
     generate_executive_summary,
 )
+from app.security import require_admin
 
-router = APIRouter(tags=["recommendations"])
+router = APIRouter(tags=["recommendations"], dependencies=[Depends(require_admin)])
 
 
 @router.get("/recommendations", response_model=schemas.RecommendationsResponse)

@@ -1,6 +1,53 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr, field_validator
+
+from app.models import UserRole
+
+
+# ---------------------------------------------------------------------------
+# Auth / User schemas
+# ---------------------------------------------------------------------------
+class SignupRequest(BaseModel):
+    name: str = Field(..., min_length=2, max_length=120)
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=72)
+    role: UserRole = UserRole.USER
+
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one digit")
+        if not any(c.isalpha() for c in v):
+            raise ValueError("Password must contain at least one letter")
+        return v
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=1)
+
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    role: UserRole
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
+
+
+class MessageResponse(BaseModel):
+    message: str
 
 
 class PredictRequest(BaseModel):

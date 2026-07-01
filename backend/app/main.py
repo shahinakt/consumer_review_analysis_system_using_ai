@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app import models  # noqa: F401 -- ensures models are registered before create_all
-from app.routers import predict, upload, dashboard, recommendations, health
+from app.routers import predict, upload, dashboard, recommendations, health, auth
 
 # Create tables on startup (fine for an MVP/SQLite; swap for Alembic later)
 Base.metadata.create_all(bind=engine)
@@ -28,6 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(auth.router)
 app.include_router(predict.router)
 app.include_router(upload.router)
 app.include_router(dashboard.router)
@@ -39,5 +40,15 @@ def root():
     return {
         "message": "Customer Review & Rating Analysis API",
         "docs": "/docs",
-        "endpoints": ["/health", "/predict", "/upload", "/dashboard", "/recommendations"],
+        "endpoints": [
+            "/health",
+            "/auth/signup",
+            "/auth/login",
+            "/auth/logout",
+            "/auth/me",
+            "/predict",
+            "/upload",
+            "/dashboard",
+            "/recommendations",
+        ],
     }

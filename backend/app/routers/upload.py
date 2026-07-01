@@ -8,8 +8,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
 from app.services.ml_service import predict_new_review
+from app.security import require_admin
 
-router = APIRouter(tags=["upload"])
+router = APIRouter(tags=["upload"], dependencies=[Depends(require_admin)])
 
 REQUIRED_COLUMN_CANDIDATES = ["review_text", "review", "text", "Review", "ReviewText"]
 

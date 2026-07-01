@@ -1,14 +1,3 @@
-"""
-ML service: loads a pre-trained sentiment model (model.pkl) and TF-IDF
-vectorizer (vectorizer.pkl) and exposes a predict_new_review() function.
-
-If model.pkl / vectorizer.pkl are not found (e.g. first run of the hackathon
-project, before the ML teammate has dropped in their trained artifacts),
-this module trains a small demo Logistic Regression model on the bundled
-sample dataset so the API never breaks. Replace the two .pkl files in
-backend/app/ml/ with your own trained artifacts at any time -- next server
-restart will pick them up automatically.
-"""
 import re
 import string
 from pathlib import Path
@@ -18,6 +7,8 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+
+from app.ml.train_sample_model import train_and_save_model
 
 ML_DIR = Path(__file__).resolve().parent.parent / "ml"
 MODEL_PATH = ML_DIR / "model.pkl"
@@ -50,52 +41,7 @@ def clean_text(text: str) -> str:
 def _train_demo_model():
     """Fallback trainer used only when no .pkl artifacts are present."""
     ML_DIR.mkdir(parents=True, exist_ok=True)
-
-    if SAMPLE_DATA_PATH.exists():
-        df = pd.read_csv(SAMPLE_DATA_PATH)
-    else:
-        # Minimal inline fallback so the app can never fail to boot
-        df = pd.DataFrame(
-            {
-                "review_text": [
-                    "Excellent product, works perfectly and arrived early",
-                    "Terrible quality, broke after one day, waste of money",
-                    "It is okay, nothing special but does the job",
-                    "Amazing customer support and fast delivery, love it",
-                    "Very disappointed, item was damaged and support ignored me",
-                    "Average product for the price, could be better",
-                ],
-                "rating": [5, 1, 3, 5, 1, 3],
-            }
-        )
-
-    def label_from_rating(r):
-        if r >= 4:
-            return "Positive"
-        if r <= 2:
-            return "Negative"
-        return "Neutral"
-
-    df["clean"] = df["review_text"].apply(clean_text)
-    df["label"] = df["rating"].apply(label_from_rating)
-
-    vectorizer = TfidfVectorizer(max_features=3000, ngram_range=(1, 2))
-    X = vectorizer.fit_transform(df["clean"])
-    y = df["label"]
-
-    if len(df) >= 10 and y.nunique() > 1:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42, stratify=y
-        )
-    else:
-        X_train, y_train = X, y
-
-    model = LogisticRegression(max_iter=1000)
-    model.fit(X_train, y_train)
-
-    joblib.dump(model, MODEL_PATH)
-    joblib.dump(vectorizer, VECTORIZER_PATH)
-    return model, vectorizer
+    return train_and_save_model()
 
 
 def _load():
@@ -148,3 +94,5 @@ def get_top_words(texts, top_n: int = 15):
     for t in texts:
         counter.update(clean_text(t).split())
     return counter.most_common(top_n)
+
+

@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
 from app.services.ml_service import get_top_words
+from app.security import require_admin
 
-router = APIRouter(tags=["dashboard"])
+router = APIRouter(tags=["dashboard"], dependencies=[Depends(require_admin)])
 
 POWERBI_EMBED_URL = os.getenv(
     "POWERBI_EMBED_URL", "https://app.powerbi.com/view?r=YOUR_REPORT_EMBED_TOKEN"

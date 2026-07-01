@@ -71,7 +71,7 @@ python -m app.ml.train_sample_model
 uvicorn app.main:app --reload --port 8000
 ```
 
-Backend is now live at `http://localhost:6269` (interactive docs at `/docs`).
+Backend is now live at `http://localhost:8000` (interactive docs at `/docs`).
 
 ### Frontend
 
@@ -113,13 +113,17 @@ can never fail to boot for lack of a model.
 
 ## 4. API reference
 
-| Method | Path              | Purpose                                              |
-|--------|-------------------|-------------------------------------------------------|
-| GET    | `/health`         | Liveness check                                        |
-| POST   | `/predict`        | Classify one review, persist it, return label/score   |
-| POST   | `/upload`         | Batch-classify a `.csv`/`.xlsx` of reviews            |
-| GET    | `/dashboard`      | KPIs, rating distribution, sentiment trend, top words |
-| GET    | `/recommendations`| Executive summary + rule-based action items           |
+| Method | Path              | Auth required        | Purpose                                              |
+|--------|-------------------|-----------------------|-------------------------------------------------------|
+| GET    | `/health`         | none                   | Liveness check                                        |
+| POST   | `/auth/signup`    | none                   | Register as ADMIN or USER, returns a JWT              |
+| POST   | `/auth/login`     | none                   | Log in, returns a JWT                                 |
+| POST   | `/auth/logout`    | any signed-in user     | Clears the client-side session                        |
+| GET    | `/auth/me`        | any signed-in user     | Returns the current user's profile                    |
+| POST   | `/predict`        | any signed-in user     | Classify one review, persist it, return label/score   |
+| POST   | `/upload`         | ADMIN only             | Batch-classify a `.csv`/`.xlsx` of reviews            |
+| GET    | `/dashboard`      | ADMIN only             | KPIs, rating distribution, sentiment trend, top words |
+| GET    | `/recommendations`| ADMIN only             | Executive summary + rule-based action items           |
 
 Full interactive schema: `http://localhost:8000/docs`.
 
@@ -127,6 +131,25 @@ Full interactive schema: `http://localhost:8000/docs`.
 `review`, `text`, `Review`, or `ReviewText`; it also picks up optional
 `rating`, `product_name`, and `customer_name` columns if present (see
 `sample_data/sample_reviews.csv` for the expected shape).
+
+### Authentication & roles
+
+- Passwords are hashed with **bcrypt** (via `passlib`) before being stored —
+  plaintext passwords are never persisted.
+- Auth is **JWT-based**: `/auth/signup` and `/auth/login` return a bearer
+  token, which the frontend stores in `localStorage` and attaches to every
+  request as `Authorization: Bearer <token>`.
+- Two roles exist: `ADMIN` and `USER`, chosen at signup. There's no
+  promotion flow — an account's role is fixed once created.
+- Admin-only endpoints are protected server-side with a `require_admin`
+  FastAPI dependency, so an ordinary `USER` calling `/dashboard` directly
+  (e.g. via curl) gets a `403`, not just a hidden UI element.
+- On the frontend, `/`, `/predict`, `/upload`, and `/recommendations` are
+  wrapped in an `AdminRoute` guard that redirects non-admins to
+  `/access-denied`; `/login` and `/signup` are public; everything else
+  requires *some* authenticated user via `ProtectedRoute`.
+- Set `JWT_SECRET_KEY` to a long random string before deploying — the
+  default in `.env.example` is for local development only.
 
 ---
 

@@ -6,12 +6,18 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
 from app.services.ml_service import predict_new_review
+from app.security import get_current_user
 
 router = APIRouter(tags=["predict"])
 
 
+# Available to any signed-in user (ADMIN or USER), not just admins.
 @router.post("/predict", response_model=schemas.PredictResponse)
-def predict_review(payload: schemas.PredictRequest, db: Session = Depends(get_db)):
+def predict_review(
+    payload: schemas.PredictRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     label, polarity, cleaned = predict_new_review(payload.review_text)
 
     customer = None

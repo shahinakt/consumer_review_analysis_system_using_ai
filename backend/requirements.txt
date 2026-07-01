@@ -10,3 +10,7 @@ python-multipart
 openpyxl
 python-dotenv
 aiofiles
+passlib[bcrypt]
+bcrypt
+python-jose[cryptography]
+email-validator
