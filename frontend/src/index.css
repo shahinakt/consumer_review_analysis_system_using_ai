@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-base-bg text-ink-primary font-body antialiased;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(124, 92, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(52, 211, 153, 0.08), transparent 35%);
+  background-attachment: fixed;
+}
+
+.light body,
+html:not(.dark) body {
+  @apply bg-white text-slate-800;
+  background-image: none;
+}
+
+/* Glassmorphism card */
+.glass {
+  @apply bg-base-surface/60 backdrop-blur-xs border border-base-border rounded-2xl shadow-glass;
+}
+
+html:not(.dark) .glass {
+  @apply bg-white border-slate-200 shadow-md;
+}
+
+/* Signature element: sentiment "pulse" bar used on KPI cards */
+.pulse-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.pulse-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--pulse-color, #7c5cff), transparent);
+}
+
+.pulse-dot {
+  animation: pulseBar 2.4s ease-in-out infinite;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-base-border rounded-full;
+}
+
+/* Focus visibility for accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #7c5cff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
