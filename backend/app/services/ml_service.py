@@ -2,11 +2,16 @@ import re
 import string
 from pathlib import Path
 
-import joblib
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+try:
+    import joblib
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import train_test_split
+except ImportError:  # pragma: no cover - runtime fallback for minimal environments
+    joblib = None
+    TfidfVectorizer = None
+    LogisticRegression = None
+    train_test_split = None
 
 from app.ml.train_sample_model import train_and_save_model
 
@@ -44,12 +49,37 @@ def _train_demo_model():
     return train_and_save_model()
 
 
+def _heuristic_predict(review_text: str):
+    cleaned = clean_text(review_text)
+    lower = cleaned.lower()
+
+    positive_hits = any(
+        word in lower for word in ["good", "great", "love", "excellent", "amazing", "perfect", "fast", "happy", "recommend", "impressed", "durable", "quality"]
+    )
+    negative_hits = any(
+        word in lower for word in ["bad", "terrible", "poor", "slow", "disappointed", "broken", "damaged", "refund", "late", "support", "issue", "waste", "hate"]
+    )
+
+    if negative_hits and not positive_hits:
+        label = "Negative"
+        confidence = 0.9
+    elif positive_hits and not negative_hits:
+        label = "Positive"
+        confidence = 0.9
+    else:
+        label = "Neutral"
+        confidence = 0.6
+
+    polarity = _polarity_from_label(label, confidence)
+    return label, polarity, cleaned
+
+
 def _load():
     global _model, _vectorizer
     if _model is not None and _vectorizer is not None:
         return _model, _vectorizer
 
-    if MODEL_PATH.exists() and VECTORIZER_PATH.exists():
+    if joblib is not None and MODEL_PATH.exists() and VECTORIZER_PATH.exists():
         _model = joblib.load(MODEL_PATH)
         _vectorizer = joblib.load(VECTORIZER_PATH)
     else:
@@ -71,8 +101,11 @@ def predict_new_review(review_text: str):
     """Classify a single review. Returns (label, polarity_score, cleaned_text)."""
     model, vectorizer = _load()
     cleaned = clean_text(review_text)
-    features = vectorizer.transform([cleaned])
 
+    if model is None or vectorizer is None:
+        return _heuristic_predict(review_text)
+
+    features = vectorizer.transform([cleaned])
     label = model.predict(features)[0]
 
     try:

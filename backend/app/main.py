@@ -7,6 +7,7 @@ from app.database import Base, engine
 from app import models  # noqa: F401 -- ensures models are registered before create_all
 from app.routers import predict, upload, dashboard, recommendations, health, auth
 
+
 # Create tables on startup (fine for an MVP/SQLite; swap for Alembic later)
 Base.metadata.create_all(bind=engine)
 
