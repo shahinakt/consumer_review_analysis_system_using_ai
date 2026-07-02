@@ -14,4 +14,3 @@ passlib[bcrypt]
 bcrypt
 python-jose[cryptography]
 email-validator
-flask

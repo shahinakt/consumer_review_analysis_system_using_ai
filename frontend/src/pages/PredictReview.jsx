@@ -14,6 +14,7 @@ export default function PredictReview() {
   const [reviewText, setReviewText] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [productName, setProductName] = useState("");
+  const [category, setCategory] = useState("");
   const [rating, setRating] = useState(5);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -30,6 +31,7 @@ export default function PredictReview() {
         review_text: reviewText,
         customer_name: customerName || undefined,
         product_name: productName || undefined,
+        category: category || undefined,
         rating: Number(rating),
       });
       setResult(res.data);
@@ -86,6 +88,18 @@ export default function PredictReview() {
                 className="w-full rounded-xl bg-base-bg/50 border border-base-border px-3.5 py-2.5 text-sm text-ink-primary placeholder:text-ink-faint focus:border-accent outline-none"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-ink-muted mb-1.5 block">
+              Category (optional, improves accuracy)
+            </label>
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="e.g. Electronics"
+              className="w-full rounded-xl bg-base-bg/50 border border-base-border px-3.5 py-2.5 text-sm text-ink-primary placeholder:text-ink-faint focus:border-accent outline-none"
+            />
           </div>
 
           <div>
