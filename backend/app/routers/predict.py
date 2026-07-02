@@ -18,7 +18,11 @@ def predict_review(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    label, polarity, cleaned = predict_new_review(payload.review_text)
+    label, polarity, cleaned = predict_new_review(
+        payload.review_text,
+        product_name=payload.product_name,
+        category=payload.category,
+    )
 
     customer = None
     if payload.customer_name:
@@ -40,9 +44,11 @@ def predict_review(
             .first()
         )
         if not product:
-            product = models.Product(product_name=payload.product_name)
+            product = models.Product(product_name=payload.product_name, category=payload.category)
             db.add(product)
             db.flush()
+        elif payload.category and not product.category:
+            product.category = payload.category
 
     review = models.Review(
         customer_id=customer.customer_id if customer else None,

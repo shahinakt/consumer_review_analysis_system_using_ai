@@ -55,6 +55,9 @@ async def upload_reviews(file: UploadFile = File(...), db: Session = Depends(get
     product_col = next(
         (c for c in ["product_name", "Product", "ProductName"] if c in df.columns), None
     )
+    category_col = next(
+        (c for c in ["category", "Category"] if c in df.columns), None
+    )
     customer_col = next(
         (c for c in ["customer_name", "Customer", "CustomerName"] if c in df.columns), None
     )
@@ -75,6 +78,11 @@ async def upload_reviews(file: UploadFile = File(...), db: Session = Depends(get
             skipped += 1
             continue
 
+        pname = None
+        category = None
+        if category_col and pd.notna(row.get(category_col)):
+            category = str(row[category_col]).strip()
+
         product_id = None
         if product_col and pd.notna(row.get(product_col)):
             pname = str(row[product_col]).strip()
@@ -85,9 +93,11 @@ async def upload_reviews(file: UploadFile = File(...), db: Session = Depends(get
                     .first()
                 )
                 if not product:
-                    product = models.Product(product_name=pname)
+                    product = models.Product(product_name=pname, category=category)
                     db.add(product)
                     db.flush()
+                elif category and not product.category:
+                    product.category = category
                 product_cache[pname] = product.product_id
             product_id = product_cache[pname]
 
@@ -124,7 +134,7 @@ async def upload_reviews(file: UploadFile = File(...), db: Session = Depends(get
         db.add(review)
         db.flush()
 
-        label, polarity, cleaned = predict_new_review(text)
+        label, polarity, cleaned = predict_new_review(text, product_name=pname, category=category)
         breakdown[label] = breakdown.get(label, 0) + 1
 
         result = models.SentimentResult(
