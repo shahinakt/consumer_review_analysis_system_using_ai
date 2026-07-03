@@ -54,6 +54,7 @@ class PredictRequest(BaseModel):
     review_text: str = Field(..., min_length=1, description="Raw review text")
     customer_name: Optional[str] = None
     product_name: Optional[str] = None
+    category: Optional[str] = Field(default=None, description="Product category, improves model accuracy")
     rating: Optional[int] = Field(default=None, ge=1, le=5)
 
 
