@@ -34,7 +34,7 @@ PulseBoard enables businesses to:
 
 ---
 
-# 3. Team Contributions
+## 3. Team Contributions
 
 > **This project was developed collaboratively as a 7-member Hackathon Project. Each team member contributed across Full Stack Development, Machine Learning, Data Science, Data Analytics, and Business Intelligence.**
 
