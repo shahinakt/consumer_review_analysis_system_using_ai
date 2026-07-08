@@ -74,7 +74,7 @@ React (Frontend)
 
 ---
 
-# 5. Features
+## 5. Features
 
 - Customer Review Upload
 - Sentiment Analysis
