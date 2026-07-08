@@ -46,7 +46,7 @@ PulseBoard enables businesses to:
 | **Pradeep Hiremath** | **Data Scientist** | Performed exploratory data analysis (EDA), feature engineering, dataset preparation, model evaluation, performance analysis, and provided insights to improve prediction accuracy. |
 | **Nandini Ganesh** | **Data Analyst** | Performed data cleaning, preprocessing, dataset validation, exploratory data analysis, and prepared structured datasets for Machine Learning training. |
 | **Harish N** | **Data Analyst** | Assisted in data cleaning, preprocessing, review categorization, statistical analysis, and validation of processed datasets before model training. |
-| **Member 7 (Replace with actual name)** | **Business Intelligence Analyst** | Designed interactive Power BI dashboards, created business reports and visualizations, presented sentiment analytics, KPIs, and customer review insights for decision-making. |
+| **Sai Lokesh** | **Business Intelligence Analyst** | Designed interactive Power BI dashboards, created business reports and visualizations, presented sentiment analytics, KPIs, and customer review insights for decision-making. |
 
 ---
 
